@@ -17,7 +17,7 @@ namespace ProjFunc.Models
         [Display(Name = "Senha:")]
         public string Senha { get; set; }
 
-        [Display(Name = "Lembrar Me")]
+        [Display(Name = "Lembrar")]
         public bool LembrarMe { get; set; }
     }
 }

@@ -1,8 +1,4 @@
 ﻿using ProjFunc.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -11,6 +7,8 @@ namespace ProjFunc.Controllers
     public class ContaController : Controller
     {
         [AllowAnonymous]
+        //Se o usuário passar por uma Url privada, a Url vai constar aqui.
+        //vai redirecionar para a tela de login. O paramatro está passando no "login.cshtml".
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
@@ -26,7 +24,8 @@ namespace ProjFunc.Controllers
                 return View(login);
             }
 
-            var achou = (login.Usuario == "ranieresilva" && login.Senha == "123");
+            //var achou = (login.Usuario == "wagnersouza" && login.Senha == "123456");
+            var achou = UsuarioModel.ValidarUsuario(login.Usuario, login.Senha);
 
             if (achou)
             {
