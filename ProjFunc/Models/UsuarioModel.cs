@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using ProjFunc.Helper;
+using System.Configuration;
 using System.Data.SqlClient;
 
 
@@ -18,7 +19,8 @@ namespace ProjFunc.Models
                 {
                     comando.Connection = conexao;
                     comando.CommandText = string.Format(
-                        "select count(*) from usuario where login='{0}' and senha='{1}'", login, senha);
+                        "select count(*) from usuario where login='{0}' and senha='{1}'",
+                        login, CriptoHelper.HashMD5 (senha));
                     ret = ((int)comando.ExecuteScalar() > 0);
                 }
             }
