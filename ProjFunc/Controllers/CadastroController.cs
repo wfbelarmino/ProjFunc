@@ -9,17 +9,91 @@ namespace ProjFunc.Controllers
 {
     public class CadastroController : Controller
     {
-        private static List<GrupoProdutoModel> _listaGrupoProduto = new List<GrupoProdutoModel>()
+        #region Usuários
+
+        private const string _senhaPadrao = "{$127;$188}";
+        [Authorize]
+        public ActionResult Usuario()
         {
-            new GrupoProdutoModel() { Id=1, Nome="Livros", Ativo=true },
-            new GrupoProdutoModel() { Id=2, Nome="Mouses", Ativo=true },
-            new GrupoProdutoModel() { Id=3, Nome="Monitores", Ativo=false }
-        };
+            ViewBag.SenhaPadrao = _senhaPadrao;
+            return View(UsuarioModel.RecuperarLista());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public ActionResult RecuperarUsuario(int id)
+        {
+            return Json(UsuarioModel.RecuperarPeloId(id));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public ActionResult ExcluirUsuario(int id)
+        {
+            return Json(UsuarioModel.ExcluirPeloId(id));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public ActionResult SalvarUsuario(UsuarioModel model)
+        {
+            var resultado = "OK";
+            var mensagens = new List<string>();
+            var idSalvo = string.Empty;
+
+            if (!ModelState.IsValid)
+            {
+                resultado = "AVISO";
+                mensagens = ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage).ToList();
+            }
+            else
+            {
+                try
+                {
+                    if (model.Senha == _senhaPadrao)
+                    {
+                        model.Senha = "";
+                    }
+
+                    var id = model.Salvar();
+                    if (id > 0)
+                    {
+                        idSalvo = id.ToString();
+                    }
+                    else
+                    {
+                        resultado = "ERRO";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    resultado = "ERRO";
+                }
+            }
+
+            return Json(new { Resultado = resultado, Mensagens = mensagens, IdSalvo = idSalvo });
+        }
+
+        #endregion
+
+        #region Grupos de produtos
 
         [Authorize]
         public ActionResult GrupoProduto()
         {
-            return View(GrupoProdutoModel.RecuperarLista());
+            //mecanica para mostrar a os itens 
+            var lista = GrupoProdutoModel.RecuperarLista();
+
+            ViewBag.QuantMaxLinhasPorPagina = 5;
+            ViewBag.PaginaAtual = 1;
+
+            var difQuantPaginas = (lista.Count % ViewBag.QuantMaxLinhasPorPagina) > 0 ? 1 : 0;
+            ViewBag.QuantPaginas = (lista.Count / ViewBag.QuantMaxLinhasPorPagina) + difQuantPaginas;
+
+            return View(lista);
         }
 
         [HttpPost]
@@ -71,6 +145,8 @@ namespace ProjFunc.Controllers
 
             return Json(new { Resultado = resultado, Mensagens = mensagens, IdSalvo = idSalvo });
         }
+
+        #endregion
 
         [Authorize]
         public ActionResult MarcaProduto()
@@ -126,10 +202,5 @@ namespace ProjFunc.Controllers
             return View();
         }
 
-        [Authorize]
-        public ActionResult Usuario()
-        {
-            return View();
-        }
     }
 }
